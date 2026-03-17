@@ -26,7 +26,13 @@ Claude CLI, Shelley, nginx, build tools):
 ### With exe.dev
 
 ```
-exe new --image=ghcr.io/c0ffee0wl/exeuntu-custom:latest
+ssh exe.dev new --name=myvm --image=ghcr.io/c0ffee0wl/exeuntu-custom:latest
+```
+
+Then connect:
+
+```
+ssh myvm.exe.xyz
 ```
 
 ### With Docker
