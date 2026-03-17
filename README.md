@@ -26,7 +26,7 @@ Claude CLI, Shelley, nginx, build tools):
 ### With exe.dev
 
 ```
-ssh exe.dev new --name=myvm --image=ghcr.io/c0ffee0wl/exeuntu-custom:latest
+ssh exe.dev new --name=my-custom-vm --image=ghcr.io/c0ffee0wl/exeuntu-custom:latest
 ```
 
 Then connect:
