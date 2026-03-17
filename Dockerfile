@@ -11,15 +11,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends zsh \
 USER exedev
 WORKDIR /home/exedev
 
-# Clone linux-setup, run with --force (non-interactive) and --no-hacking-tools,
-# then clean up. The trailing "; true" absorbs non-zero exits from harmless
-# systemd/chsh failures during Docker build.
+# Clone and run linux-setup with --force (non-interactive) and --no-hacking-tools.
+# SHELL override is needed because the base image sets "bash -euxo pipefail",
+# where -e would abort on harmless systemd/chsh failures during Docker build.
+SHELL ["/bin/bash", "-c"]
 RUN git clone --depth 1 https://github.com/c0ffee0wl/linux-setup.git /tmp/linux-setup \
     && /tmp/linux-setup/linux-setup.sh --force --no-hacking-tools \
     ; rm -rf /tmp/linux-setup \
     && sudo apt-get clean \
-    && sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-    ; true
+    && sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
 # Guarantee zsh is default shell for exedev (fallback if chsh failed above)
 USER root
