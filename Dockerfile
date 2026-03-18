@@ -3,6 +3,11 @@ FROM ghcr.io/boldsoftware/exeuntu:latest
 # OCI label links this package to the GitHub repo (enables GHCR <-> repo integration)
 LABEL org.opencontainers.image.source=https://github.com/c0ffee0wl/exeuntu-custom
 
+# Remove docker.io so linux-setup.sh installs docker-ce from Docker's official repo
+RUN apt-get remove -y docker.io docker-compose-v2 docker-buildx containerd runc \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
 # Run linux-setup as exedev so dotfiles land in /home/exedev with correct ownership.
 # ENV USER is needed because Docker build doesn't set $USER — the script uses it
 # for "usermod -aG docker $USER" and "chsh $USER" which fail with empty $USER.
