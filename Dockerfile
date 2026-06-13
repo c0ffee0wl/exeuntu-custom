@@ -24,7 +24,6 @@ RUN git clone --depth 1 https://github.com/c0ffee0wl/linux-setup.git ~/linux-set
     && (~/linux-setup/linux-setup.sh --force --no-hacking-tools || true) \
     && sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
 # Match base image entrypoint (systemd via init-wrapper)
 CMD ["/usr/local/bin/init"]

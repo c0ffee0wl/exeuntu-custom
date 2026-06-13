@@ -15,7 +15,7 @@ that extends the exe.dev base image (exeuntu) with a personal dev environment.
 
 - Base image user: `exedev` (UID 1000), has passwordless sudo and docker group
 - Base image init: systemd via `/usr/local/bin/init` (init-wrapper.sh)
-- Default shell: zsh (set via usermod fallback in Dockerfile)
+- Default shell: zsh (set by linux-setup.sh's chsh during build)
 - The `linux-setup.sh --force --no-hacking-tools` flag runs non-interactively and skips pentesting tools
 - The linux-setup repo is cloned to `~/linux-setup` and kept there so the script can be rerun later
 - The `|| true` in the RUN command absorbs expected non-zero exits from systemd/chsh failures during build
@@ -31,4 +31,4 @@ that extends the exe.dev base image (exeuntu) with a personal dev environment.
 
 - Fork or modify the exeuntu repo — we only consume the published image
 - Vendor linux-setup.sh — it is always cloned fresh at build time
-- Remove the `; true` from the Dockerfile RUN — systemd commands fail during Docker build and that is expected
+- Remove the `|| true` from the Dockerfile RUN — systemd/chsh commands fail during Docker build and that is expected
