@@ -19,11 +19,17 @@ ENV USER=exedev
 # --force (non-interactive) and --no-hacking-tools. The script has "set -eo pipefail"
 # internally, causing it to abort on commands like systemctl that fail in Docker.
 # We run it with || true to let the build continue.
+#
+# We intentionally KEEP /var/lib/apt/lists (the package index) so that
+# `apt-cache search` works inside the running container. `apt-get clean` still
+# drops the downloaded .deb archives to keep the image lean, and the final
+# `apt-get update` rebuilds a fresh index. Do NOT re-add `rm -rf /var/lib/apt/lists/*`.
 SHELL ["/bin/bash", "-c"]
 RUN git clone --depth 1 https://github.com/c0ffee0wl/linux-setup.git ~/linux-setup \
     && (~/linux-setup/linux-setup.sh --force --no-hacking-tools || true) \
     && sudo apt-get clean \
-    && sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    && sudo rm -rf /tmp/* /var/tmp/* \
+    && sudo apt-get update
 
 # Match base image entrypoint (systemd via init-wrapper)
 CMD ["/usr/local/bin/init"]
