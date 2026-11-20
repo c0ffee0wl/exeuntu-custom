@@ -7,8 +7,9 @@ environment from [linux-setup](https://github.com/c0ffee0wl/linux-setup).
 ## What it adds
 
 The exeuntu base already ships Ubuntu 24.04 with systemd, Docker, headless
-Chrome, the Claude CLI, Shelley, nginx, and the usual build tools. On top of
-that, this image runs `linux-setup.sh` to set up:
+Chrome, Shelley and other coding agents, Go, uv, and the usual dev tools (see
+[its Dockerfile](https://github.com/boldsoftware/exeuntu/blob/main/Dockerfile)).
+On top of that, this image runs `linux-setup.sh` to set up:
 
 **Shell**
 
@@ -26,7 +27,7 @@ that, this image runs `linux-setup.sh` to set up:
 
 - Rust via rustup
 - Bun, with `node` / `npx` shims so it drops in for Node.js
-- Go and PowerShell
+- PowerShell
 - Python tooling through pipx and uv (uv installs httpie, tldr, and name-that-hash)
 
 **Supply-chain hardening**
@@ -51,7 +52,7 @@ ssh myvm.exe.xyz
 
 ```
 docker pull ghcr.io/c0ffee0wl/exeuntu-custom:latest
-docker run -d --name myvm ghcr.io/c0ffee0wl/exeuntu-custom:latest
+docker run -d --privileged --name myvm ghcr.io/c0ffee0wl/exeuntu-custom:latest
 ```
 
 ## Building locally
@@ -66,6 +67,9 @@ The Dockerfile builds on `ghcr.io/boldsoftware/exeuntu:latest`, then clones and
 runs [linux-setup.sh](https://github.com/c0ffee0wl/linux-setup) with
 `--force --no-hacking-tools`. `--force` answers every prompt with yes so the
 build stays non-interactive, and `--no-hacking-tools` skips the pentest tooling.
+Afterwards it restores a few base-image defaults that the setup script changes:
+Docker goes back to starting on first use, `/etc/machine-id` is emptied so
+each VM gets its own, and the image runs as root so systemd can boot.
 GitHub Actions rebuilds the image weekly so it picks up changes to both the base
 image and the setup script.
 

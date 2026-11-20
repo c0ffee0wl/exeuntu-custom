@@ -9,11 +9,10 @@ RUN apt-get remove -y docker.io docker-compose-v2 docker-buildx containerd runc 
     && rm -rf /var/lib/apt/lists/*
 
 # Run linux-setup as exedev so dotfiles land in /home/exedev with correct ownership.
-# ENV USER is needed because Docker build doesn't set $USER — the script uses it
-# for "usermod -aG docker $USER" and "chsh $USER" which fail with empty $USER.
+# Docker build doesn't set $USER, so it is passed to the script for installers
+# that expect it — inline rather than ENV, so root shells don't inherit it.
 USER exedev
 WORKDIR /home/exedev
-ENV USER=exedev
 
 # Clone linux-setup into ~/linux-setup (kept for later reruns) and run it with
 # --force (non-interactive) and --no-hacking-tools. The script has "set -eo pipefail"
@@ -26,10 +25,22 @@ ENV USER=exedev
 # `apt-get update` rebuilds a fresh index. Do NOT re-add `rm -rf /var/lib/apt/lists/*`.
 SHELL ["/bin/bash", "-c"]
 RUN git clone --depth 1 https://github.com/c0ffee0wl/linux-setup.git ~/linux-setup \
-    && (~/linux-setup/linux-setup.sh --force --no-hacking-tools || true) \
+    && (USER=exedev ~/linux-setup/linux-setup.sh --force --no-hacking-tools || true) \
     && sudo apt-get clean \
     && sudo rm -rf /tmp/* /var/tmp/* \
     && sudo apt-get update
 
-# Match base image entrypoint (systemd via init-wrapper)
+# Root like the base image, so init (systemd) can run as PID 1; SSH logins
+# still land as exedev via the inherited exe.dev/login-user label.
+USER root
+
+# Restore upstream defaults that linux-setup changes: Docker socket-activated
+# rather than started at boot, and an empty (not deleted) machine-id so each VM
+# generates its own. Keep this the last RUN: package installs bake in an ID.
+# No `|| true` here: a failure (e.g. docker-ce missing) should fail the build.
+RUN systemctl disable docker.service containerd.service \
+    && systemctl enable docker.socket \
+    && truncate -s 0 /etc/machine-id \
+    && ln -sf /etc/machine-id /var/lib/dbus/machine-id
+
 CMD ["/usr/local/bin/init"]

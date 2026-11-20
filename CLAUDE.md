@@ -32,3 +32,4 @@ that extends the exe.dev base image (exeuntu) with a personal dev environment.
 - Fork or modify the exeuntu repo — we only consume the published image
 - Vendor linux-setup.sh — it is always cloned fresh at build time
 - Remove the `|| true` from the Dockerfile RUN — systemd/chsh commands fail during Docker build and that is expected
+- Add package-installing steps after the final machine-id RUN — they bake a shared machine ID into every VM
